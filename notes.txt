@@ -1,0 +1,100 @@
+
+TODO
+- Pre-retirement loop:
+    1. Calculate earnings.  Create a generic calculation function that can be
+       used for each type of account.
+
+       A. Create a generic function that can be used for each type of
+          account.  It requires the following information:
+          a. The current balance of the account.
+          b. The asset allocation of the account.
+          c. Interest rate for each asset type that is held in the account.
+          d. Pass the information as (accountName).
+             * The accountName should be associated with a previously-defined
+               account that contains the asset allocation and balance.
+             * Let the function obtain the earningsRateXXX for the assets.
+
+       B. Different types of accounts have different asset allocations, so
+          calculate each account separately.
+
+       C. Taxable accounts:
+          a. Some earn interest (CD, checking, savings).
+          b. Some earn dividends or capital gains.
+
+       D. Tax deferred:
+          a. Part of the money will be in stocks.
+          b. Part of the money will be in bonds.
+
+       E. Tax free:
+          a. All in stocks.
+
+    2. Add new contributions.  Different amounts go into each investment.  For
+       example:
+       A. 25,000 into each 401(k).
+       B.  7,000 into each ROTH.
+       C. Remainder going into brokerage account.
+
+- Post retirement loop:
+    1. Calculate earnings.  Same as described above.
+
+    2. Calculate regular expenses.
+
+    3. Withdrawal strategy.
+       A. Calculate RMD for person1.
+       B. Calculate RMD for person2.
+       C. Withdrawal (if necessary) from taxable accounts.
+       D. Withdrawal (if necessary) from tax deferred accounts.
+       E. Withdrawal (if necessary) from tax free accounts.
+
+    4. Rebalance.
+       A. Shift between accounts if necessary.
+       B. Remember any withdrawals for tax calculation purposes.
+
+    5. Calculate taxes.  Each savings type is taxed separately.  In other
+       words:
+       A. Tax the interest, dividends, and capital gains from taxable
+          accounts.  Don't tax the basis.
+       B. Straight up regular income tax on IRA and 401(k) withdrawals.
+       C. No taxes on ROTH.
+
+    6. Recalculate taxes to include all money removed from steps 3 and 4.
+       You have to pay taxes on your withdrawals, including the money you
+       withdrawal to pay your taxes.
+
+    7. Calculate medical expenses.
+
+- Keep the "savingsBalance" in an object that breaks the savings out into the
+  different types (taxable, tax deferred, and tax free).
+
+- Replace a bunch of the dictionary types with array, using dates or ages as
+  the index.
+
+- ROTH conversion prior to 70 1/2.
+
+- ROTH conversion after 70 1/2.  Probably N/A.
+
+- RMD consideration for annual "withdrawal".
+
+- Different rate for each type of "Savings".
+
+- Different asset allocation for each type of "Savings".
+
+- Different "annualContribution" for each type of "Savings".
+
+- Use historical averages of earnings for each type of investment account:
+  - earningsRateChecking
+  - earningsRateSavings
+  - earningsRateCD
+  - earningsRateBonds
+  - earningsRateStocks
+
+- Use historical data.  Grab the historical data going back as far as I can
+  find, and use that in order to give a more realistic picture of how our
+  portfolio will perform as the economy goes up and down.
+  - Cash (savings and CDs).
+  - Equities.
+  - Bonds.
+  - Inflation.
+  - Medicare premiums.
+  - Medicare supplement premiums.
+
