@@ -2,3 +2,8 @@
 .*.swp
 .*.swo
 
+# The config file.  Right now it's hard coded into retirement.js, and we
+# want to play around with test data in that file.  So we don't want to push
+# changes unless we change the contents of the file (not just the values).
+config.json
+

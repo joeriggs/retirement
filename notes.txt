@@ -1,5 +1,9 @@
 
 TODO
+
+- Keep the "savingsBalance" in an object that breaks the savings out into the
+  different types (taxable, tax deferred, and tax free).
+
 - Pre-retirement loop:
     1. Calculate earnings.  Create a generic calculation function that can be
        used for each type of account.
@@ -62,9 +66,6 @@ TODO
        withdrawal to pay your taxes.
 
     7. Calculate medical expenses.
-
-- Keep the "savingsBalance" in an object that breaks the savings out into the
-  different types (taxable, tax deferred, and tax free).
 
 - Replace a bunch of the dictionary types with array, using dates or ages as
   the index.
