@@ -11,8 +11,13 @@ console.log(userConfig)
 console.log("============================================================")
 console.log("============================================================")
 
+/*******************************************************************************
+ ********************** Initialization.
+ ******************************************************************************/
+
 /* The year the oldest person was born and the year the last person is predicted to die. */
-const firstYear = (userConfig.spouse1_DOB > userConfig.spouse2_DOB) ? userConfig.spouse2_DOB : userConfig.spouse1_DOB
+const firstYear = (userConfig.spouse1_DOB < userConfig.spouse2_DOB) ?
+                   userConfig.spouse1_DOB : userConfig.spouse2_DOB
 
 const lastYear = ((userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) > (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)) ?
                   (userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) : (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)
