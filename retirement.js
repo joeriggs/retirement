@@ -11,16 +11,15 @@ console.log(userConfig)
 console.log("============================================================")
 console.log("============================================================")
 
-/*******************************************************************************
- ********************** Initialization.
- ******************************************************************************/
-
-/* The year the oldest person was born and the year the last person is predicted to die. */
-const firstYear = (userConfig.spouse1_DOB < userConfig.spouse2_DOB) ?
-                   userConfig.spouse1_DOB : userConfig.spouse2_DOB
-
-const lastYear = ((userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) > (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)) ?
-                  (userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) : (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)
+// Convert the percentage values to decimal.
+userConfig.earningsRateChecking /= 100
+userConfig.earningsRateSavings  /= 100
+userConfig.earningsRateCD       /= 100
+userConfig.earningsRateBonds    /= 100
+userConfig.earningsRateStocks   /= 100
+userConfig.savingsInterestRate  /= 100
+userConfig.inflationRate        /= 100
+userConfig.COLA                 /= 100
 
 /*******************************************************************************
  ********************** Utility functions.
@@ -48,15 +47,14 @@ function totalSavingsInit(savingsInfo) {
  ******************************************************************************/
 
 /*******************************************************************************
- * Return the Social Security benefit for the specified year.
+ * Calculate all of the Social Security benefits for the specified person.
+ * Store the results in an array that is indexed by the year.
  ******************************************************************************/
-function ssaBenefitInit(personDOB, personLifeExpectancy,
-                        person_62, person_67, person_70,
-                        spouseDOB, spouseLifeExpectancy,
-                        spouse_62, spouse_67, spouse_70) {
-	let data = {}
+class ssaBenefit {
+	constructor(personDOB, personLifeExpectancy, person_62, person_67, person_70,
+                    spouseDOB, spouseLifeExpectancy, spouse_62, spouse_67, spouse_70) {
+		this.benefit = []
 
-	{
 		let personDeathYear = personDOB + personLifeExpectancy
 
 		let firstSSYear = personDOB + 70
@@ -84,19 +82,19 @@ function ssaBenefitInit(personDOB, personLifeExpectancy,
 
 		for(let year = firstYear; year < lastYear; year++) {
 			if(year >= personDeathYear) {
-				data[year] = 0
+				this.benefit[year] = 0
 			}
 			else if (year >= firstSurvivorYear) {
-				data[year] = annualSurvivorBenefit
+				this.benefit[year] = annualSurvivorBenefit
 			}
 			else if(year >= firstSpousalYear) {
-				data[year] = annualSpousalBenefit
+				this.benefit[year] = annualSpousalBenefit
 			}
 			else if(year >= firstSSYear) {
-				data[year] = annualBenefit
+				this.benefit[year] = annualBenefit
 			}
 			else {
-				data[year] = 0
+				this.benefit[year] = 0
 			}
 
 			if(year > userConfig.curYear) {
@@ -114,11 +112,6 @@ function ssaBenefitInit(personDOB, personLifeExpectancy,
 			}
 		}
 	}
-
-	function ssaCalc(year) {
-		return data[year]
-	}
-	return ssaCalc
 }
 
 /*******************************************************************************
@@ -378,7 +371,7 @@ function requiredMinimumDistributionInit() {
  ********************** Program starts here.
  ******************************************************************************/
 
-console.log("Starting retirement program.")
+console.log("\nStarting retirement program.")
 
 // Load the initial savings amounts into a map.  This allows us to pass the
 // savings data to functions by reference.
@@ -390,25 +383,29 @@ myMap.set("spouse1TaxFreeSavings",     userConfig.spouse1TaxFreeSavings)
 myMap.set("spouse2TaxDeferredSavings", userConfig.spouse2TaxDeferredSavings)
 myMap.set("spouse2TaxFreeSavings",     userConfig.spouse2TaxFreeSavings)
 
-// Convert the percentage values to decimal.
-userConfig.earningsRateChecking /= 100
-userConfig.earningsRateSavings  /= 100
-userConfig.earningsRateCD       /= 100
-userConfig.earningsRateBonds    /= 100
-userConfig.earningsRateStocks   /= 100
+/*******************************************************************************
+ ********************** Initialization.
+ ******************************************************************************/
 
-userConfig.savingsInterestRate /= 100
-userConfig.inflationRate       /= 100
-userConfig.COLA                /= 100
+// The year the oldest person was born.
+const firstYear = (userConfig.spouse1_DOB < userConfig.spouse2_DOB) ?
+                   userConfig.spouse1_DOB : userConfig.spouse2_DOB
 
-let ssaSpouse1 = ssaBenefitInit(userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
-                                userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70,
-                                userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
-                                userConfig.spouse2_SS62, userConfig.spouse2_SS67, userConfig.spouse2_SS70)
-let ssaSpouse2 = ssaBenefitInit(userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
-                                userConfig.spouse2_SS62, userConfig.spouse2_SS67, userConfig.spouse2_SS70,
-                                userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
-                                userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70)
+// The year the last person is predicted to die.
+const lastYear = ((userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) > (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)) ?
+                  (userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) : (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)
+
+// All of the Social Security benefits for person #1, pre-calculated.
+let ssa1 = new ssaBenefit(userConfig.spouse1_DOB,  userConfig.spouse1_LifeExpectancy,
+                          userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70,
+                          userConfig.spouse2_DOB,  userConfig.spouse2_LifeExpectancy,
+                          userConfig.spouse2_SS62, userConfig.spouse2_SS67, userConfig.spouse2_SS70)
+
+// All of the Social Security benefits for person #1, pre-calculated.
+let ssa2 = new ssaBenefit(userConfig.spouse2_DOB,  userConfig.spouse2_LifeExpectancy,
+                          userConfig.spouse2_SS62, userConfig.spouse2_SS67, userConfig.spouse2_SS70,
+                          userConfig.spouse1_DOB,  userConfig.spouse1_LifeExpectancy,
+                          userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70)
 
 let medicalExpenses = medicalExpensesInit(userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
                                           userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
@@ -457,13 +454,12 @@ while(year < userConfig.retirementYear) {
 }
 
 // Process the retirement years.
-console.log("")
 console.log("           Beginning                      Soc Sec        Soc Sec                         Medical          Income          Final")
 console.log("            Balance        Earnings      Person #1      Person #2         Expenses      Insurance          Taxes         Balance")
 while(year < deathYear) {
 	// Get the SS benefits.
-	let ssVal1 = ssaSpouse1(year)
-	let ssVal2 = ssaSpouse2(year)
+	let ssVal1 = ssa1.benefit[year]
+	let ssVal2 = ssa2.benefit[year]
 
 	// Get the Medical/Medicare and regular expenses.
 	let annualMedicalExpenses = medicalExpenses(year)
