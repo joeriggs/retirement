@@ -1,55 +1,15 @@
 'use strict'
 
 /*******************************************************************************
- ********************** User data.
+ ********************** Load the user's data.
  ******************************************************************************/
 
-let retirementYear = 2021
-
-// Starting values of all of the customer's savings.
-let jointTaxableSavings       = 123456.78
-let jointCashSavings          = 1234.56
-let spouse1TaxDeferredSavings = 1234567.89
-let spouse1TaxFreeSavings     = 12345.67
-let spouse2TaxDeferredSavings = 1234567.89
-let spouse2TaxFreeSavings     = 12345.67
-
-let annualContribution    = 10000
-let currentAnnualExpenses = 50000
-
-let spouse1_DOB = 1960, spouse1_LifeExpectancy = 90
-let spouse2_DOB = 1960, spouse2_LifeExpectancy = 90
-
-// These are our Social Security benefit predictions for ages 62, 67, and 70.
-// Currently using values that were calculated if we retire in 2019.
-let spouse1_SS62 = 1000, spouse1_SS67 = 1500, spouse1_SS70 = 2000
-let spouse2_SS62 = 1000, spouse2_SS67 = 1500, spouse2_SS70 = 2000
-
-/*******************************************************************************
- ********************** Input variables with reasonable defaults.
- ******************************************************************************/
-
-let curYear = 2019
-
-/* Earnings rates for various types of investment accounts.
- * Each represents a percent amount. */
-let earningsRateChecking = 0.1
-let earningsRateSavings  = 0.5
-let earningsRateCD       = 1.0
-let earningsRateBonds    = 2.0
-let earningsRateStocks   = 6.0
-
-let savingsInterestRate = 5.0
-let inflationRate       = 3.0
-let COLA                = 2.0
-
-let annualPerPersonMedIns = 12000
-
-// 2019:
-//    Part B         : $135.50/month : $1,626.00/year
-//    Medigap Plan B : $449.00/month : $5,388.00/year
-//    TOTAL          : $584.50/month : $7,014.00/year
-let annualPerPersonMedicare = 7500
+console.log("============================================================")
+console.log("============================================================")
+var userConfig = require('./config.json')
+console.log(userConfig)
+console.log("============================================================")
+console.log("============================================================")
 
 /*******************************************************************************
  ********************** Utility functions.
@@ -92,12 +52,12 @@ function totalSavingsInit(savingsInfo) {
 	let savingsMap = savingsInfo
 	function calcTotalSavings() {
 
-		return savingsMap.get(jointCashSavings) +
-		       savingsMap.get(jointTaxableSavings) +
-		       savingsMap.get(spouse1TaxDeferredSavings) +
-		       savingsMap.get(spouse1TaxFreeSavings) +
-		       savingsMap.get(spouse2TaxDeferredSavings) +
-		       savingsMap.get(spouse2TaxFreeSavings)
+		return savingsMap.get("jointCashSavings") +
+		       savingsMap.get("jointTaxableSavings") +
+		       savingsMap.get("spouse1TaxDeferredSavings") +
+		       savingsMap.get("spouse1TaxFreeSavings") +
+		       savingsMap.get("spouse2TaxDeferredSavings") +
+		       savingsMap.get("spouse2TaxFreeSavings")
 	}
 	return calcTotalSavings
 }
@@ -164,16 +124,16 @@ function ssaBenefitInit(personDOB, personLifeExpectancy,
 				data[year] = 0
 			}
 
-			if(year > curYear) {
-				annualBenefit += annualBenefit * COLA
+			if(year > userConfig.curYear) {
+				annualBenefit += annualBenefit * userConfig.COLA
 				annualBenefit = Math.round(annualBenefit * 100)
 				annualBenefit /= 100
 
-				annualSpousalBenefit += annualSpousalBenefit * COLA
+				annualSpousalBenefit += annualSpousalBenefit * userConfig.COLA
 				annualSpousalBenefit = Math.round(annualSpousalBenefit * 100)
 				annualSpousalBenefit /= 100
 
-				annualSurvivorBenefit += annualSurvivorBenefit * COLA
+				annualSurvivorBenefit += annualSurvivorBenefit * userConfig.COLA
 				annualSurvivorBenefit = Math.round(annualSurvivorBenefit * 100)
 				annualSurvivorBenefit /= 100
 			}
@@ -225,10 +185,10 @@ function medicalExpensesInit(personDOB, personLifeExpectancy,
 				let personPremium = 0
 				if(personAge < personLifeExpectancy) {
 					if(personAge < 65) {
-						personPremium = annualPerPersonMedIns
+						personPremium = userConfig.annualPerPersonMedIns
 					}
 					else {
-						personPremium = annualPerPersonMedicare
+						personPremium = userConfig.annualPerPersonMedicare
 					}
 				}
 
@@ -236,10 +196,10 @@ function medicalExpensesInit(personDOB, personLifeExpectancy,
 				let spousePremium = 0
 				if(spouseAge < spouseLifeExpectancy) {
 					if(spouseAge < 65) {
-						spousePremium = annualPerPersonMedIns
+						spousePremium = userConfig.annualPerPersonMedIns
 					}
 					else {
-						spousePremium = annualPerPersonMedicare
+						spousePremium = userConfig.annualPerPersonMedicare
 					}
 				}
 
@@ -248,9 +208,9 @@ function medicalExpensesInit(personDOB, personLifeExpectancy,
 
 			data[year] = amount
 
-			if(year > curYear) {
-				annualPerPersonMedIns    = Math.round((annualPerPersonMedIns   + (annualPerPersonMedIns   * inflationRate)) * 100) / 100
-				annualPerPersonMedicare  = Math.round((annualPerPersonMedicare + (annualPerPersonMedicare * inflationRate)) * 100) / 100
+			if(year > userConfig.curYear) {
+				userConfig.annualPerPersonMedIns    = Math.round((userConfig.annualPerPersonMedIns   + (userConfig.annualPerPersonMedIns   * userConfig.inflationRate)) * 100) / 100
+				userConfig.annualPerPersonMedicare  = Math.round((userConfig.annualPerPersonMedicare + (userConfig.annualPerPersonMedicare * userConfig.inflationRate)) * 100) / 100
 			}
 		}
 	}
@@ -353,7 +313,7 @@ function annualExpensesInit(currentAnnualExpenses, inflationRate,
 		for(let year = firstYear; year < lastYear; year++) {
 			let amount = 0
 
-			if(year < curYear) {
+			if(year < userConfig.curYear) {
 				amount = 0
 			}
 
@@ -456,49 +416,49 @@ console.log("Starting retirement program.")
 // Load the initial savings amounts into a map.  This allows us to pass the
 // savings data to functions by reference.
 var myMap = new Map()
-myMap.set(jointCashSavings,          jointCashSavings)
-myMap.set(jointTaxableSavings,       jointTaxableSavings)
-myMap.set(spouse1TaxDeferredSavings, spouse1TaxDeferredSavings)
-myMap.set(spouse1TaxFreeSavings,     spouse1TaxFreeSavings)
-myMap.set(spouse2TaxDeferredSavings, spouse2TaxDeferredSavings)
-myMap.set(spouse2TaxFreeSavings,     spouse2TaxFreeSavings)
+myMap.set("jointCashSavings",          userConfig.jointCashSavings)
+myMap.set("jointTaxableSavings",       userConfig.jointTaxableSavings)
+myMap.set("spouse1TaxDeferredSavings", userConfig.spouse1TaxDeferredSavings)
+myMap.set("spouse1TaxFreeSavings",     userConfig.spouse1TaxFreeSavings)
+myMap.set("spouse2TaxDeferredSavings", userConfig.spouse2TaxDeferredSavings)
+myMap.set("spouse2TaxFreeSavings",     userConfig.spouse2TaxFreeSavings)
 
 // Convert the percentage values to decimal.
-earningsRateChecking /= 100
-earningsRateSavings  /= 100
-earningsRateCD       /= 100
-earningsRateBonds    /= 100
-earningsRateStocks   /= 100
+userConfig.earningsRateChecking /= 100
+userConfig.earningsRateSavings  /= 100
+userConfig.earningsRateCD       /= 100
+userConfig.earningsRateBonds    /= 100
+userConfig.earningsRateStocks   /= 100
 
-savingsInterestRate /= 100
-inflationRate       /= 100
-COLA                /= 100
+userConfig.savingsInterestRate /= 100
+userConfig.inflationRate       /= 100
+userConfig.COLA                /= 100
 
-let ssaSpouse1 = ssaBenefitInit(spouse1_DOB, spouse1_LifeExpectancy,
-                                spouse1_SS62, spouse1_SS67, spouse1_SS70,
-                                spouse2_DOB, spouse2_LifeExpectancy,
-                                spouse2_SS62, spouse2_SS67, spouse2_SS70)
-let ssaSpouse2 = ssaBenefitInit(spouse2_DOB, spouse2_LifeExpectancy,
-                                spouse2_SS62, spouse2_SS67, spouse2_SS70,
-                                spouse1_DOB, spouse1_LifeExpectancy,
-                                spouse1_SS62, spouse1_SS67, spouse1_SS70)
+let ssaSpouse1 = ssaBenefitInit(userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
+                                userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70,
+                                userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
+                                userConfig.spouse2_SS62, userConfig.spouse2_SS67, userConfig.spouse2_SS70)
+let ssaSpouse2 = ssaBenefitInit(userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
+                                userConfig.spouse2_SS62, userConfig.spouse2_SS67, userConfig.spouse2_SS70,
+                                userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
+                                userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70)
 
-let medicalExpenses = medicalExpensesInit(spouse1_DOB, spouse1_LifeExpectancy,
-                                          spouse2_DOB, spouse2_LifeExpectancy,
-                                          retirementYear)
+let medicalExpenses = medicalExpensesInit(userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
+                                          userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
+                                          userConfig.retirementYear)
 
-let annualExpenses = annualExpensesInit(currentAnnualExpenses, inflationRate,
-                                        spouse1_DOB, spouse1_LifeExpectancy,
-                                        spouse2_DOB, spouse2_LifeExpectancy)
+let annualExpenses = annualExpensesInit(userConfig.currentAnnualExpenses, userConfig.inflationRate,
+                                        userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
+                                        userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy)
 
 let rmd = requiredMinimumDistributionInit()
 
 let totalSavings = totalSavingsInit(myMap)
 
-let year = curYear
+let year = userConfig.curYear
 
-let spouse1_DeathYear = spouse1_DOB + spouse1_LifeExpectancy
-let spouse2_DeathYear = spouse2_DOB + spouse2_LifeExpectancy
+let spouse1_DeathYear = userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy
+let spouse2_DeathYear = userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy
 let deathYear = spouse1_DeathYear
 if(spouse1_DeathYear < spouse2_DeathYear) {
 	deathYear = spouse2_DeathYear
@@ -508,23 +468,23 @@ if(spouse1_DeathYear < spouse2_DeathYear) {
 console.log("")
 console.log("          Beginning                                       Final")
 console.log("           Balance        Earnings   Contribution        Balance")
-while(year < retirementYear) {
-	let earnings  = (totalSavings() * savingsInterestRate)
+while(year < userConfig.retirementYear) {
+	let earnings  = (totalSavings() * userConfig.savingsInterestRate)
 	earnings  = Math.round(earnings * 100)
 	earnings /= 100
 
-	let newBalance = totalSavings() + earnings + annualContribution
+	let newBalance = totalSavings() + earnings + userConfig.annualContribution
 
 	let newBalanceString           = newBalance.toLocaleString(        'en-US', { style : 'decimal', maximumFractionDigits : 2, minimumFractionDigits : 2}).padStart(12, " ")
 	let totalSavingsString         = totalSavings().toLocaleString(    'en-US', { style : 'decimal', maximumFractionDigits : 2, minimumFractionDigits : 2}).padStart(12, " ")
 	let earningsString             = earnings.toLocaleString(          'en-US', { style : 'decimal', maximumFractionDigits : 2, minimumFractionDigits : 2}).padStart(12, " ")
-	let annualContributionString   = annualContribution.toLocaleString('en-US', { style : 'decimal', maximumFractionDigits : 2, minimumFractionDigits : 2}).padStart(12, " ")
+	let annualContributionString   = userConfig.annualContribution.toLocaleString('en-US', { style : 'decimal', maximumFractionDigits : 2, minimumFractionDigits : 2}).padStart(12, " ")
 
 	console.log(`${year} : ${totalSavingsString} + ${earningsString} + ${annualContributionString} = ${newBalanceString}`)
 
-	let currentJointCashSavings = myMap.get(jointCashSavings)
-	currentJointCashSavings += (earnings + annualContribution)
-	myMap.set(jointCashSavings, currentJointCashSavings)
+	let currentJointCashSavings = myMap.get("jointCashSavings")
+	currentJointCashSavings += (earnings + userConfig.annualContribution)
+	myMap.set("jointCashSavings", currentJointCashSavings)
 
 	year++
 }
@@ -542,7 +502,7 @@ while(year < deathYear) {
 	let annualMedicalExpenses = medicalExpenses(year)
 	let annualBasicExpenses = annualExpenses(year)
 
-	let earnings = Math.round(totalSavings() * savingsInterestRate * 100) / 100
+	let earnings = Math.round(totalSavings() * userConfig.savingsInterestRate * 100) / 100
 
 	let annualIncomeTaxes = calculateIncomeTax(annualBasicExpenses, 0, 0, annualMedicalExpenses)
 
@@ -558,12 +518,12 @@ while(year < deathYear) {
 	let h = annualIncomeTaxes.toLocaleString(    'en-US', { style : 'decimal', maximumFractionDigits : 2, minimumFractionDigits : 2}).padStart(12, " ")
 	console.log(`${year} : (${b} + ${c} + ${d} + ${e}) - (${f} + ${g} + ${h}) = ${a}`)
 
-	let prev = myMap.get(jointCashSavings)
+	let prev = myMap.get("jointCashSavings")
 	let adds = (earnings + ssVal1 + ssVal2)
 	let subs = (annualBasicExpenses + annualMedicalExpenses + annualIncomeTaxes)
 	let next = ((prev + adds) - subs)
 	next  = Math.round(next * 100) / 100
-	myMap.set(jointCashSavings, next)
+	myMap.set("jointCashSavings", next)
 
 	year++
 }

@@ -1,0 +1,38 @@
+
+{
+
+	"retirementYear" : 2021,
+
+	"jointTaxableSavings"       : 100000.00,
+	"jointCashSavings"          : 100000.00,
+	"spouse1TaxDeferredSavings" : 50000.00,
+	"spouse1TaxFreeSavings"     : 50000.00,
+	"spouse2TaxDeferredSavings" : 150000.00,
+	"spouse2TaxFreeSavings"     : 150000.00,
+
+	"annualContribution"    : 20000,
+	"currentAnnualExpenses" : 50000,
+
+	"spouse1_DOB" : 1960, "spouse1_LifeExpectancy" : 90,
+	"spouse2_DOB" : 1960, "spouse2_LifeExpectancy" : 85,
+
+	"spouse1_SS62" :  600, "spouse1_SS67" :  800, "spouse1_SS70" : 1000,
+	"spouse2_SS62" : 1000, "spouse2_SS67" : 1500, "spouse2_SS70" : 2000,
+
+	"curYear" : 2019,
+
+	"earningsRateChecking" : 0.1,
+	"earningsRateSavings"  : 0.5,
+	"earningsRateCD"       : 1.0,
+	"earningsRateBonds"    : 2.0,
+	"earningsRateStocks"   : 6.0,
+
+	"savingsInterestRate" : 5.0,
+	"inflationRate"       : 3.0,
+	"COLA"                : 2.0,
+
+	"annualPerPersonMedIns" : 12000,
+
+	"annualPerPersonMedicare" : 7500
+}
+
