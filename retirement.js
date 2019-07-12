@@ -59,6 +59,9 @@ class ssaBenefit {
 			annualSurvivorBenefit = (spouse_70 * 12)
 		}
 
+		let currentDate = new Date()
+		let curYear = currentDate.getFullYear()
+
 		for(let year = firstYear; year < lastYear; year++) {
 			if(year >= personDeathYear) {
 				this.benefit[year] = 0
@@ -76,7 +79,7 @@ class ssaBenefit {
 				this.benefit[year] = 0
 			}
 
-			if(year > userConfig.curYear) {
+			if(year > curYear) {
 				annualBenefit += annualBenefit * userConfig.COLA
 				annualBenefit = Math.round(annualBenefit * 100)
 				annualBenefit /= 100
@@ -118,6 +121,9 @@ class medicalInsurance {
 		let personDeathYear = personDOB + personLifeExpectancy
 		let spouseDeathYear = spouseDOB + spouseLifeExpectancy
 
+		let currentDate = new Date()
+		let curYear = currentDate.getFullYear()
+
 		for(let year = firstYear; year < lastYear; year++) {
 			let amount = 0
 
@@ -153,7 +159,7 @@ class medicalInsurance {
 
 			this.premium[year] = amount
 
-			if(year > userConfig.curYear) {
+			if(year > curYear) {
 				userConfig.annualPerPersonMedIns    = Math.round((userConfig.annualPerPersonMedIns   + (userConfig.annualPerPersonMedIns   * userConfig.inflationRate)) * 100) / 100
 				userConfig.annualPerPersonMedicare  = Math.round((userConfig.annualPerPersonMedicare + (userConfig.annualPerPersonMedicare * userConfig.inflationRate)) * 100) / 100
 			}
@@ -183,10 +189,13 @@ class annualExpenses {
 		let personDeathYear = personDOB + personLifeExpectancy
 		let spouseDeathYear = spouseDOB + spouseLifeExpectancy
 
+		let currentDate = new Date()
+		let curYear = currentDate.getFullYear()
+
 		for(let year = firstYear; year < lastYear; year++) {
 			let amount = 0
 
-			if(year < userConfig.curYear) {
+			if(year < curYear) {
 				amount = 0
 			}
 
@@ -415,7 +424,8 @@ let rmd = requiredMinimumDistributionInit()
 
 let totalSavings = totalSavingsInit(myMap)
 
-let year = userConfig.curYear
+let currentDate = new Date()
+let year = currentDate.getFullYear()
 
 let spouse1_DeathYear = userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy
 let spouse2_DeathYear = userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy
@@ -450,6 +460,7 @@ while(year < userConfig.retirementYear) {
 }
 
 // Process the retirement years.
+console.log("")
 console.log("           Beginning                      Soc Sec        Soc Sec                         Medical          Income          Final")
 console.log("            Balance        Earnings      Person #1      Person #2         Expenses      Insurance          Taxes         Balance")
 while(year < deathYear) {
