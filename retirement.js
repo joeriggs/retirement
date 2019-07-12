@@ -11,39 +11,15 @@ console.log(userConfig)
 console.log("============================================================")
 console.log("============================================================")
 
+/* The year the oldest person was born and the year the last person is predicted to die. */
+const firstYear = (userConfig.spouse1_DOB > userConfig.spouse2_DOB) ? userConfig.spouse2_DOB : userConfig.spouse1_DOB
+
+const lastYear = ((userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) > (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)) ?
+                  (userConfig.spouse1_DOB + userConfig.spouse1_LifeExpectancy) : (userConfig.spouse2_DOB + userConfig.spouse2_LifeExpectancy)
+
 /*******************************************************************************
  ********************** Utility functions.
  ******************************************************************************/
-
-/*******************************************************************************
- * Simple utility functions that return the year the oldest person was born and
- * the year the last person is predicted to die.  This range essentially
- * represents all of the years that we need to process.
- ******************************************************************************/
-function getFirstYear(person1_DOB, person2_DOB) {
-	let firstYear = person1_DOB
-	if(person1_DOB > person2_DOB) {
-		firstYear = person2_DOB
-	}
-	return firstYear
-}
-
-function getLastYear(person1_DOB, person1_LifeExpectancy,
-                     person2_DOB, person2_LifeExpectancy) {
-	let person1_DeathYear = person1_DOB + person1_LifeExpectancy
-	let person2_DeathYear = person2_DOB + person2_LifeExpectancy
-	let lastYear = person1_DeathYear
-	if(person1_DeathYear < person2_DeathYear) {
-		lastYear = person2_DeathYear
-	}
-	return lastYear
-}
-
-/*******************************************************************************
- * Return the earnings for an account.
- ******************************************************************************/
-function earningsOneAccount(balance, allocationStocks, allocationBonds) {
-}
 
 /*******************************************************************************
  * Return the current total savings amount.
@@ -76,12 +52,6 @@ function ssaBenefitInit(personDOB, personLifeExpectancy,
 	let data = {}
 
 	{
-		/* Set firstYear and lastYear to the entire span of time that
-		 * either spouse is alive. */
-		let firstYear = getFirstYear(personDOB, spouseDOB)
-		let lastYear  = getLastYear(personDOB, personLifeExpectancy,
-		                            spouseDOB, spouseLifeExpectancy)
-
 		let personDeathYear = personDOB + personLifeExpectancy
 
 		let firstSSYear = personDOB + 70
@@ -166,10 +136,6 @@ function medicalExpensesInit(personDOB, personLifeExpectancy,
 	let data = {}
 
 	{
-		let firstYear = getFirstYear(personDOB, spouseDOB)
-		let lastYear  = getLastYear(personDOB, personLifeExpectancy,
-		                            spouseDOB, spouseLifeExpectancy)
-
 		let personDeathYear = personDOB + personLifeExpectancy
 		let spouseDeathYear = spouseDOB + spouseLifeExpectancy
 
@@ -303,10 +269,6 @@ function annualExpensesInit(currentAnnualExpenses, inflationRate,
 	let data = {}
 
 	{
-		let firstYear = getFirstYear(personDOB, spouseDOB)
-		let lastYear  = getLastYear(personDOB, personLifeExpectancy,
-		                            spouseDOB, spouseLifeExpectancy)
-
 		let personDeathYear = personDOB + personLifeExpectancy
 		let spouseDeathYear = spouseDOB + spouseLifeExpectancy
 
