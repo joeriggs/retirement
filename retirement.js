@@ -52,7 +52,7 @@ function totalSavingsInit(savingsInfo) {
  ******************************************************************************/
 class ssaBenefit {
 	constructor(personDOB, personLifeExpectancy, person_62, person_67, person_70,
-                    spouseDOB, spouseLifeExpectancy, spouse_62, spouse_67, spouse_70) {
+	            spouseDOB, spouseLifeExpectancy, spouse_62, spouse_67, spouse_70) {
 		this.benefit = []
 
 		let personDeathYear = personDOB + personLifeExpectancy
@@ -115,9 +115,11 @@ class ssaBenefit {
 }
 
 /*******************************************************************************
- * Return the medical insurance or Medicare cost for the specified year.  The
- * pattern looks like this:
- * 1. Both spouses using regular medical insurance
+ * Calculate all of the medical insurance and Medicare annual premiums for the
+ * married couple.
+ *
+ * The pattern looks like this:
+ * 1. Both spouses using regular medical insurance.
  * 2. One spouse using regular medical insurance and one spouse using Medicare.
  * 3. Both spouses using Medicare.
  * 4. One spouse using Medicare and one spouse dead.
@@ -127,13 +129,13 @@ class ssaBenefit {
  *
  * Note that we might need to skip one or more of the first 4 steps.
  ******************************************************************************/
-function medicalExpensesInit(personDOB, personLifeExpectancy,
-                             spouseDOB, spouseLifeExpectancy,
-                             retirementYear) {
+class medicalInsurance {
+	constructor(personDOB, personLifeExpectancy,
+	            spouseDOB, spouseLifeExpectancy,
+	            retirementYear) {
 
-	let data = {}
+		this.premium = []
 
-	{
 		let personDeathYear = personDOB + personLifeExpectancy
 		let spouseDeathYear = spouseDOB + spouseLifeExpectancy
 
@@ -170,7 +172,7 @@ function medicalExpensesInit(personDOB, personLifeExpectancy,
 				amount = personPremium + spousePremium
 			}
 
-			data[year] = amount
+			this.premium[year] = amount
 
 			if(year > userConfig.curYear) {
 				userConfig.annualPerPersonMedIns    = Math.round((userConfig.annualPerPersonMedIns   + (userConfig.annualPerPersonMedIns   * userConfig.inflationRate)) * 100) / 100
@@ -178,11 +180,6 @@ function medicalExpensesInit(personDOB, personLifeExpectancy,
 			}
 		}
 	}
-
-	function medicalExpensesCalc(year) {
-		return data[year]
-	}
-	return medicalExpensesCalc
 }
 
 /*******************************************************************************
@@ -407,9 +404,9 @@ let ssa2 = new ssaBenefit(userConfig.spouse2_DOB,  userConfig.spouse2_LifeExpect
                           userConfig.spouse1_DOB,  userConfig.spouse1_LifeExpectancy,
                           userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70)
 
-let medicalExpenses = medicalExpensesInit(userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
-                                          userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
-                                          userConfig.retirementYear)
+let medicalExpenses = new medicalInsurance(userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
+                                           userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
+                                           userConfig.retirementYear)
 
 let annualExpenses = annualExpensesInit(userConfig.currentAnnualExpenses, userConfig.inflationRate,
                                         userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
@@ -462,7 +459,7 @@ while(year < deathYear) {
 	let ssVal2 = ssa2.benefit[year]
 
 	// Get the Medical/Medicare and regular expenses.
-	let annualMedicalExpenses = medicalExpenses(year)
+	let annualMedicalExpenses = medicalExpenses.premium[year]
 	let annualBasicExpenses = annualExpenses(year)
 
 	let earnings = Math.round(totalSavings() * userConfig.savingsInterestRate * 100) / 100
