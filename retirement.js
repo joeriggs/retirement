@@ -22,32 +22,11 @@ userConfig.inflationRate        /= 100
 userConfig.COLA                 /= 100
 
 /*******************************************************************************
- ********************** Utility functions.
+ ********************** A lot of things can be pre-calculated.
  ******************************************************************************/
 
 /*******************************************************************************
- * Return the current total savings amount.
- ******************************************************************************/
-function totalSavingsInit(savingsInfo) {
-	let savingsMap = savingsInfo
-	function calcTotalSavings() {
-
-		return savingsMap.get("jointCashSavings") +
-		       savingsMap.get("jointTaxableSavings") +
-		       savingsMap.get("spouse1TaxDeferredSavings") +
-		       savingsMap.get("spouse1TaxFreeSavings") +
-		       savingsMap.get("spouse2TaxDeferredSavings") +
-		       savingsMap.get("spouse2TaxFreeSavings")
-	}
-	return calcTotalSavings
-}
-
-/*******************************************************************************
- ********************** Processing functions.
- ******************************************************************************/
-
-/*******************************************************************************
- * Calculate all of the Social Security benefits for the specified person.
+ * Pre-calculate all of the Social Security benefits for the specified person.
  * Store the results in an array that is indexed by the year.
  ******************************************************************************/
 class ssaBenefit {
@@ -115,7 +94,7 @@ class ssaBenefit {
 }
 
 /*******************************************************************************
- * Calculate all of the medical insurance and Medicare annual premiums for the
+ * Pre-calculate all of the medical insurance and Medicare annual premiums for the
  * married couple.
  *
  * The pattern looks like this:
@@ -183,6 +162,66 @@ class medicalInsurance {
 }
 
 /*******************************************************************************
+ * Pre-calculate the annual household expenses.
+ *
+ * We don't currently do anything fancy.  We just start with the current annual
+ * expenses, and then we adjust each year for the projected inflation rate. Some
+ * examples of "fancy" would be:
+ *
+ * 1. As the people get older, reduce their spending to show how older Americans
+ *    don't spend as much as younger people (and still adjust for inflation).
+ *
+ * 2. Reduce expenses if a spouse dies.
+ ******************************************************************************/
+class annualExpenses {
+	constructor(currentAnnualExpenses, inflationRate,
+	            personDOB, personLifeExpectancy,
+	            spouseDOB, spouseLifeExpectancy) {
+
+		this.data = []
+
+		let personDeathYear = personDOB + personLifeExpectancy
+		let spouseDeathYear = spouseDOB + spouseLifeExpectancy
+
+		for(let year = firstYear; year < lastYear; year++) {
+			let amount = 0
+
+			if(year < userConfig.curYear) {
+				amount = 0
+			}
+
+			else {
+				amount = Math.floor(currentAnnualExpenses)
+				currentAnnualExpenses += Math.floor(currentAnnualExpenses * inflationRate)
+			}
+
+			this.data[year] = amount
+		}
+	}
+}
+
+/*******************************************************************************
+ ********************** Regular functions.
+ ******************************************************************************/
+
+/*******************************************************************************
+ * Return the current total savings amount.
+ ******************************************************************************/
+function totalSavingsInit(savingsInfo) {
+	let savingsMap = savingsInfo
+	function calcTotalSavings() {
+
+		return savingsMap.get("jointCashSavings") +
+		       savingsMap.get("jointTaxableSavings") +
+		       savingsMap.get("spouse1TaxDeferredSavings") +
+		       savingsMap.get("spouse1TaxFreeSavings") +
+		       savingsMap.get("spouse2TaxDeferredSavings") +
+		       savingsMap.get("spouse2TaxFreeSavings")
+	}
+	return calcTotalSavings
+}
+
+/*******************************************************************************
  * Calculate the income tax for the specified incomes.  This implementation is
  * based on the 2017 "Married Filing Jointly" rates:
  *
@@ -245,48 +284,6 @@ function calculateIncomeTax(income, dividends, ltCapGains, medicalExpenses) {
 	}
 
 	return Math.ceil(tax)
-}
-
-/*******************************************************************************
- * Calculate the annual expenses for the household.
- *
- * We don't currently do anything fancy.  We just start with the current annual
- * expenses, and then we adjust each year for the projected inflation rate. Some
- * examples of "fancy" would be:
- * 1. As the people get older, reduce their spending to show how older Americans
- *    don't spend as much as younger people (and still adjust for inflation).
- * 2. Reduce expenses if a spouse dies.
- ******************************************************************************/
-function annualExpensesInit(currentAnnualExpenses, inflationRate,
-                            personDOB, personLifeExpectancy,
-                            spouseDOB, spouseLifeExpectancy) {
-
-	let data = {}
-
-	{
-		let personDeathYear = personDOB + personLifeExpectancy
-		let spouseDeathYear = spouseDOB + spouseLifeExpectancy
-
-		for(let year = firstYear; year < lastYear; year++) {
-			let amount = 0
-
-			if(year < userConfig.curYear) {
-				amount = 0
-			}
-
-			else {
-				amount = Math.floor(currentAnnualExpenses)
-				currentAnnualExpenses += Math.floor(currentAnnualExpenses * inflationRate)
-			}
-
-			data[year] = amount
-		}
-	}
-
-	function annualExpensesCalc(year) {
-		return data[year]
-	}
-	return annualExpensesCalc
 }
 
 /*******************************************************************************
@@ -404,13 +401,15 @@ let ssa2 = new ssaBenefit(userConfig.spouse2_DOB,  userConfig.spouse2_LifeExpect
                           userConfig.spouse1_DOB,  userConfig.spouse1_LifeExpectancy,
                           userConfig.spouse1_SS62, userConfig.spouse1_SS67, userConfig.spouse1_SS70)
 
+// All of the medical insurance and Medicare premiums are pre-calculated.
 let medicalExpenses = new medicalInsurance(userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
                                            userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy,
                                            userConfig.retirementYear)
 
-let annualExpenses = annualExpensesInit(userConfig.currentAnnualExpenses, userConfig.inflationRate,
-                                        userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
-                                        userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy)
+// All of the household expenses are pre-calculated.
+let householdExpenses = new annualExpenses(userConfig.currentAnnualExpenses, userConfig.inflationRate,
+                                           userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
+                                           userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy)
 
 let rmd = requiredMinimumDistributionInit()
 
@@ -460,7 +459,7 @@ while(year < deathYear) {
 
 	// Get the Medical/Medicare and regular expenses.
 	let annualMedicalExpenses = medicalExpenses.premium[year]
-	let annualBasicExpenses = annualExpenses(year)
+	let annualBasicExpenses = householdExpenses.data[year]
 
 	let earnings = Math.round(totalSavings() * userConfig.savingsInterestRate * 100) / 100
 
