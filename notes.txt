@@ -67,6 +67,8 @@ TODO
 
     7. Calculate medical expenses.
 
+- Support a single person (i.e. no spouse data).
+
 - Replace a bunch of the dictionary types with array, using dates or ages as
   the index.
 

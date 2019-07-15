@@ -168,6 +168,91 @@ class medicalInsurance {
 }
 
 /*******************************************************************************
+ * Pre-calculate the IRA Required Minimum Distribution (RMD) percentages for a
+ * person.  The percentages are stored in rmdTable, and are indexed by the age
+ * of the person.
+ ******************************************************************************/
+class requiredMinimumDistribution {
+	constructor() {
+		this.rmdTable = []
+
+		this.rmdTable[70] = 27.4
+		this.rmdTable[71] = 26.5
+		this.rmdTable[72] = 25.6
+		this.rmdTable[73] = 24.7
+		this.rmdTable[74] = 23.8
+		this.rmdTable[75] = 22.9
+		this.rmdTable[76] = 22.0
+		this.rmdTable[77] = 21.2
+		this.rmdTable[78] = 20.3
+		this.rmdTable[79] = 19.5
+
+		this.rmdTable[80] = 18.7
+		this.rmdTable[81] = 17.9
+		this.rmdTable[82] = 17.1
+		this.rmdTable[83] = 16.3
+		this.rmdTable[84] = 15.5
+		this.rmdTable[85] = 14.8
+		this.rmdTable[86] = 14.1
+		this.rmdTable[87] = 13.4
+		this.rmdTable[88] = 12.7
+		this.rmdTable[89] = 12.0
+
+		this.rmdTable[90] = 11.4
+		this.rmdTable[91] = 10.8
+		this.rmdTable[92] = 10.2
+		this.rmdTable[93] = 9.6
+		this.rmdTable[94] = 9.1
+		this.rmdTable[95] = 8.6
+		this.rmdTable[96] = 8.1
+		this.rmdTable[97] = 7.6
+		this.rmdTable[98] = 7.1
+		this.rmdTable[99] = 6.7
+
+		this.rmdTable[100] = 6.3
+		this.rmdTable[101] = 5.9
+		this.rmdTable[102] = 5.5
+		this.rmdTable[103] = 5.2
+		this.rmdTable[104] = 4.9
+		this.rmdTable[105] = 4.5
+		this.rmdTable[106] = 4.2
+		this.rmdTable[107] = 3.9
+		this.rmdTable[108] = 3.7
+		this.rmdTable[109] = 3.4
+
+		this.rmdTable[110] = 3.1
+		this.rmdTable[111] = 2.9
+		this.rmdTable[112] = 2.6
+		this.rmdTable[113] = 2.4
+		this.rmdTable[114] = 2.1
+		this.rmdTable[115] = 1.9
+	}
+
+	/* Calculate and return the actual RMD for the person.
+	 *
+	 * Input:
+	 *   age    = the age of the person.
+	 *   amount = the current balance of their IRA.
+	 */
+	calc(age, amount) {
+		let result = 0
+		if(age < 70) {
+			result = 0
+		}
+		else if(age < 115) {
+			let pct = this.rmdTable[age] / 100
+			result = amount * pct
+		}
+		else {
+			let pct = 1.9 / 100
+			result = amount * pct
+		}
+
+		return result
+	}
+}
+
+/*******************************************************************************
  * Pre-calculate the annual household expenses.
  *
  * We don't currently do anything fancy.  We just start with the current annual
@@ -296,81 +381,6 @@ function calculateIncomeTax(income, dividends, ltCapGains, medicalExpenses) {
 }
 
 /*******************************************************************************
- * Calculate the IRA Required Minimum Distribution (RMD) for a person.
- ******************************************************************************/
-function requiredMinimumDistributionInit() {
-	// The index is a person's age.
-	let rmdTable = []
-	rmdTable[70] = 27.4
-	rmdTable[71] = 26.5
-	rmdTable[72] = 25.6
-	rmdTable[73] = 24.7
-	rmdTable[74] = 23.8
-	rmdTable[75] = 22.9
-	rmdTable[76] = 22.0
-	rmdTable[77] = 21.2
-	rmdTable[78] = 20.3
-	rmdTable[79] = 19.5
-
-	rmdTable[80] = 18.7
-	rmdTable[81] = 17.9
-	rmdTable[82] = 17.1
-	rmdTable[83] = 16.3
-	rmdTable[84] = 15.5
-	rmdTable[85] = 14.8
-	rmdTable[86] = 14.1
-	rmdTable[87] = 13.4
-	rmdTable[88] = 12.7
-	rmdTable[89] = 12.0
-
-	rmdTable[90] = 11.4
-	rmdTable[91] = 10.8
-	rmdTable[92] = 10.2
-	rmdTable[93] = 9.6
-	rmdTable[94] = 9.1
-	rmdTable[95] = 8.6
-	rmdTable[96] = 8.1
-	rmdTable[97] = 7.6
-	rmdTable[98] = 7.1
-	rmdTable[99] = 6.7
-
-	rmdTable[100] = 6.3
-	rmdTable[101] = 5.9
-	rmdTable[102] = 5.5
-	rmdTable[103] = 5.2
-	rmdTable[104] = 4.9
-	rmdTable[105] = 4.5
-	rmdTable[106] = 4.2
-	rmdTable[107] = 3.9
-	rmdTable[108] = 3.7
-	rmdTable[109] = 3.4
-
-	rmdTable[110] = 3.1
-	rmdTable[111] = 2.9
-	rmdTable[112] = 2.6
-	rmdTable[113] = 2.4
-	rmdTable[114] = 2.1
-	rmdTable[115] = 1.9
-
-	function rmdCalc(age, amount) {
-		if(age < 70) {
-			rmd = 0
-		}
-		else if(age < 115) {
-			pct = rmdTable[age] / 100
-			rmd = amount * pct
-		}
-		else {
-			pct = 1.9 / 100
-			rmd = amount * pct
-		}
-
-		return rmd
-	}
-	return rmdCalc
-}
-
-/*******************************************************************************
  ********************** Program starts here.
  ******************************************************************************/
 
@@ -420,7 +430,7 @@ let householdExpenses = new annualExpenses(userConfig.currentAnnualExpenses, use
                                            userConfig.spouse1_DOB, userConfig.spouse1_LifeExpectancy,
                                            userConfig.spouse2_DOB, userConfig.spouse2_LifeExpectancy)
 
-let rmd = requiredMinimumDistributionInit()
+let rmd = new requiredMinimumDistribution()
 
 let totalSavings = totalSavingsInit(myMap)
 
@@ -464,6 +474,15 @@ console.log("")
 console.log("           Beginning                      Soc Sec        Soc Sec                         Medical          Income          Final")
 console.log("            Balance        Earnings      Person #1      Person #2         Expenses      Insurance          Taxes         Balance")
 while(year < deathYear) {
+
+	let age1 = year - userConfig.spouse1_DOB
+	let rmd1 = rmd.calc(age1, userConfig.spouse1TaxDeferredSavings)
+
+	let age2 = year - userConfig.spouse2_DOB
+	let rmd2 = rmd.calc(age2, userConfig.spouse2TaxDeferredSavings)
+
+	console.log(`Spouse1: age ${age1}, IRA ${userConfig.spouse1TaxDeferredSavings}, RMD ${rmd1} : Spouse2: age ${age2}, IRA ${userConfig.spouse2TaxDeferredSavings}, RMD ${rmd2}`)
+
 	// Get the SS benefits.
 	let ssVal1 = ssa1.benefit[year]
 	let ssVal2 = ssa2.benefit[year]
